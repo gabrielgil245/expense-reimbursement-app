@@ -1,5 +1,5 @@
 # Compiled class file
-*.class
+src/main/java/dao/ConnectionUtilities.java
 
 # Log file
 *.log
@@ -9,6 +9,7 @@
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
+.idea/sonarlint
 
 # Package Files #
 *.jar

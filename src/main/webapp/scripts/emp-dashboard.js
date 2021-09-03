@@ -1,0 +1,83 @@
+const urlParams = new URLSearchParams(window.location.search);
+const userId = urlParams.get("id");
+
+window.onload = async () => {
+    const sessionResponse = await fetch(`${domain}/api/check-session`);
+    const sessionUserData = await sessionResponse.json();
+
+    if(sessionUserData.data){
+        if(sessionUserData.data.usersId != userId) {
+            window.location = `${domain}/`;
+        }
+    }else {
+        window.location = `${domain}/`;
+    }
+    populateData();
+}
+
+let addTicketBtn = document.getElementById("add-ticket-btn");
+addTicketBtn.onclick = async () => {
+    window.location = `${domain}/emp-add-reimb?id=${userId}`;
+}
+
+let logoutBtn = document.getElementById("logout-btn");
+logoutBtn.onclick = async () => {
+    let logoutRes = await fetch(`${domain}/api/logout`);
+    let logoutResData = await logoutRes.json();
+    if(logoutResData.success) window.location = `${domain}/`;
+}
+
+populateData = async () => {
+    let reimbRes = await fetch(`${domain}/api/tickets?id=${userId}`);
+    let reimbResData = await reimbRes.json();
+
+    reimbResData.data.sort((a, b) => {
+        if(a.reimbursementId < b.reimbursementId) return 1;
+        else if (a.reimbursementId > b.reimbursementId) return -1;
+        else return 0;
+    });
+
+    let cardDataContElem = document.getElementById("reimb-card");
+    cardDataContElem.innerHTML = ``;
+
+    reimbResData.data.forEach(ticket => {
+        let resolvedTicket;
+        if(!ticket.reimbursementResolved) {
+            resolvedTicket = null;
+        }
+        if(ticket.reimbursementResolved) {
+            resolvedTicket = new Date(ticket.reimbursementResolved).toDateString();
+        }
+
+        cardDataContElem.innerHTML +=
+        `
+        <div class="d-flex justify-content-between card-header">
+            <a class="card-link text-decoration-none" data-bs-toggle="collapse" href="#cardId${ticket.reimbursementId}">
+                Reimbursement Ticket Id ${ticket.reimbursementId}
+            </a>
+            <span">${ticket.reimbursementStatus}</span>
+        </div>
+        <div id="cardId${ticket.reimbursementId}" class="collapse" data-parent="#accordion">
+            <div class="card-body">
+                <div class="bg-light fw-bold">Amount</div>
+                <div>${ticket.reimbursementAmount}</div>
+                <div class="bg-light fw-bold">Submitted</div>
+                <div>${new Date(ticket.reimbursementSubmitted).toDateString()}</div>
+                <div class="bg-light fw-bold">Resolved</div>
+                <div>${resolvedTicket}</div>
+                <div class="bg-light fw-bold">Description</div>
+                <div>${ticket.reimbursementDescription}</div>
+                <div class="bg-light fw-bold">Receipt</div>
+                <div>${ticket.reimbursementReceipt}</div>
+                <div class="bg-light fw-bold">Resolver</div>
+                <div>${ticket.reimbursementResolver}</div>
+                <div class="bg-light fw-bold">Status</div>
+                <div>${ticket.reimbursementStatus}</div>
+                <div class="bg-light fw-bold">Type</div>
+                <div>${ticket.reimbursementType}</div>
+            </div>
+        </div>
+        `
+    });
+}
+
