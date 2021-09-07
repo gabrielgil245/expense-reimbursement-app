@@ -1,4 +1,4 @@
-# expense-reimbursement-system
+# expense-reimbursement-app
 
 Name: Gabriel Gil
 
